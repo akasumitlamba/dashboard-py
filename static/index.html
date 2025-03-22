@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Visualization Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #6B48FF;
+            --secondary: #FF6584;
+            --background: #F5F7FA;
+            --text: #1A202C;
+            --card: #FFFFFF;
+            --muted: #A0AEC0;
+            --sidebar: #2D3748;
+            --sidebar-text: #E2E8F0;
+        }
+        [data-theme="dark"] {
+            --primary: #A78BFA;
+            --secondary: #F687B3;
+            --background: #1A202C;
+            --text: #E2E8F0;
+            --card: #2D3748;
+            --muted: #718096;
+            --sidebar: #1A202C;
+            --sidebar-text: #A0AEC0;
+        }
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            transition: all 0.3s ease;
+        }
+        .sidebar {
+            width: 250px;
+            background-color: var(--sidebar);
+            color: var(--sidebar-text);
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+        .sidebar h2 {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .sidebar a {
+            color: var(--sidebar-text);
+            text-decoration: none;
+            display: block;
+            padding: 10px 0;
+            transition: color 0.3s;
+        }
+        .sidebar a:hover {
+            color: var(--primary);
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 30px;
+        }
+        .card {
+            background-color: var(--card);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .filter-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .filter-section label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 5px;
+            display: block;
+        }
+        .filter-section select, .filter-section input {
+            width: 100%;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid var(--muted);
+            background-color: var(--card);
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+        .filter-section input[type="range"] {
+            accent-color: var(--primary);
+        }
+        .chart-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+        }
+        .clear-button {
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+            .main-content {
+                margin-left: 200px;
+            }
+            .chart-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>Vuexy</h2>
+        <a href="#">📊 Dashboards</a>
+        <a href="#">📈 Analytics</a>
+        <a href="#">🛒 eCommerce</a>
+        <a href="#">📅 Calendar</a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Data Visualization Dashboard</h1>
+            <button id="themeToggle" class="btn btn-primary">Toggle Dark Mode</button>
+        </div>
+
+        <!-- Filters -->
+        <div class="filter-section">
+            <div>
+                <label for="endYearFilter">End Year</label>
+                <select id="endYearFilter"></select>
+            </div>
+            <div>
+                <label for="topicFilter">Topic</label>
+                <select id="topicFilter"></select>
+            </div>
+            <div>
+                <label for="sectorFilter">Sector</label>
+                <select id="sectorFilter"></select>
+            </div>
+            <div>
+                <label for="regionFilter">Region</label>
+                <select id="regionFilter"></select>
+            </div>
+            <div>
+                <label for="pestleFilter">PESTLE</label>
+                <select id="pestleFilter"></select>
+            </div>
+            <div>
+                <label for="sourceFilter">Source</label>
+                <select id="sourceFilter"></select>
+            </div>
+            <div>
+                <label for="countryFilter">Country</label>
+                <select id="countryFilter"></select>
+            </div>
+            <div>
+                <label for="intensityFilter">Intensity Range</label>
+                <input type="range" id="intensityFilter" min="0" max="100" value="0">
+                <span id="intensityValue">0</span>
+            </div>
+            <div>
+                <label for="likelihoodFilter">Likelihood Range</label>
+                <input type="range" id="likelihoodFilter" min="0" max="5" value="0">
+                <span id="likelihoodValue">0</span>
+            </div>
+        </div>
+
+        <!-- Clear Filters Button -->
+        <div class="clear-button">
+            <button id="clearFilters" class="btn btn-secondary">Clear Filters</button>
+        </div>
+
+        <!-- Charts -->
+        <div class="chart-container">
+            <div class="card">
+                <canvas id="intensityByRegionChart"></canvas>
+            </div>
+            <div class="card">
+                <canvas id="likelihoodByTopicChart"></canvas>
+            </div>
+            <div class="card">
+                <canvas id="intensityBySectorChart"></canvas>
+            </div>
+            <div class="card">
+                <canvas id="likelihoodByPestleChart"></canvas>
+            </div>
+            <div class="card">
+                <canvas id="intensityByCountryChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme toggle
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            document.body.dataset.theme = document.body.dataset.theme === 'dark' ? '' : 'dark';
+        });
+
+        let allData = []; // Store the full dataset
+        let charts = {}; // Store chart instances
+
+        // Fetch filters
+        fetch('/api/filters')
+            .then(response => response.json())
+            .then(data => {
+                populateDropdown('endYearFilter', data.end_year);
+                populateDropdown('topicFilter', data.topics);
+                populateDropdown('sectorFilter', data.sectors);
+                populateDropdown('regionFilter', data.regions);
+                populateDropdown('pestleFilter', data.pestle);
+                populateDropdown('sourceFilter', data.sources);
+                populateDropdown('countryFilter', data.countries);
+
+                // Set up intensity and likelihood range sliders
+                const intensityFilter = document.getElementById('intensityFilter');
+                const intensityValue = document.getElementById('intensityValue');
+                intensityFilter.min = data.intensity_range.min;
+                intensityFilter.max = data.intensity_range.max;
+                intensityFilter.value = data.intensity_range.min;
+                intensityValue.textContent = intensityFilter.value;
+
+                const likelihoodFilter = document.getElementById('likelihoodFilter');
+                const likelihoodValue = document.getElementById('likelihoodValue');
+                likelihoodFilter.min = data.likelihood_range.min;
+                likelihoodFilter.max = data.likelihood_range.max;
+                likelihoodFilter.value = data.likelihood_range.min;
+                likelihoodValue.textContent = likelihoodFilter.value;
+
+                // Update range values on input
+                intensityFilter.addEventListener('input', () => {
+                    intensityValue.textContent = intensityFilter.value;
+                    updateCharts();
+                });
+                likelihoodFilter.addEventListener('input', () => {
+                    likelihoodValue.textContent = likelihoodFilter.value;
+                    updateCharts();
+                });
+            })
+            .catch(error => console.error("Error fetching filters:", error));
+
+        function populateDropdown(id, options) {
+            const select = document.getElementById(id);
+            select.innerHTML = '<option value="">All</option>' + 
+                (options || []).map(option => `<option value="${option}">${option}</option>`).join('');
+        }
+
+        // Fetch data and create charts
+        fetch('/api/data')
+            .then(response => response.json())
+            .then(data => {
+                allData = data.filter(item => item.intensity !== null); // Filter out invalid entries
+                updateCharts();
+
+                // Add event listeners to filters
+                document.getElementById('endYearFilter').addEventListener('change', updateCharts);
+                document.getElementById('topicFilter').addEventListener('change', updateCharts);
+                document.getElementById('sectorFilter').addEventListener('change', updateCharts);
+                document.getElementById('regionFilter').addEventListener('change', updateCharts);
+                document.getElementById('pestleFilter').addEventListener('change', updateCharts);
+                document.getElementById('sourceFilter').addEventListener('change', updateCharts);
+                document.getElementById('countryFilter').addEventListener('change', updateCharts);
+
+                // Add event listener for Clear Filters button
+                document.getElementById('clearFilters').addEventListener('click', clearFilters);
+            })
+            .catch(error => console.error("Error fetching data:", error));
+
+        function clearFilters() {
+            // Reset dropdowns to "All"
+            document.getElementById('endYearFilter').value = '';
+            document.getElementById('topicFilter').value = '';
+            document.getElementById('sectorFilter').value = '';
+            document.getElementById('regionFilter').value = '';
+            document.getElementById('pestleFilter').value = '';
+            document.getElementById('sourceFilter').value = '';
+            document.getElementById('countryFilter').value = '';
+
+            // Reset range sliders to their minimum values
+            const intensityFilter = document.getElementById('intensityFilter');
+            const intensityValue = document.getElementById('intensityValue');
+            intensityFilter.value = intensityFilter.min;
+            intensityValue.textContent = intensityFilter.value;
+
+            const likelihoodFilter = document.getElementById('likelihoodFilter');
+            const likelihoodValue = document.getElementById('likelihoodValue');
+            likelihoodFilter.value = likelihoodFilter.min;
+            likelihoodValue.textContent = likelihoodFilter.value;
+
+            // Update charts with unfiltered data
+            updateCharts();
+        }
+
+        function updateCharts() {
+            // Get filter values
+            const endYear = document.getElementById('endYearFilter').value;
+            const topic = document.getElementById('topicFilter').value;
+            const sector = document.getElementById('sectorFilter').value;
+            const region = document.getElementById('regionFilter').value;
+            const pestle = document.getElementById('pestleFilter').value;
+            const source = document.getElementById('sourceFilter').value;
+            const country = document.getElementById('countryFilter').value;
+            const intensityMin = parseInt(document.getElementById('intensityFilter').value);
+            const likelihoodMin = parseInt(document.getElementById('likelihoodFilter').value);
+
+            // Filter data
+            let filteredData = allData;
+            if (endYear) filteredData = filteredData.filter(item => item.end_year === endYear);
+            if (topic) filteredData = filteredData.filter(item => item.topic === topic);
+            if (sector) filteredData = filteredData.filter(item => item.sector === sector);
+            if (region) filteredData = filteredData.filter(item => item.region === region);
+            if (pestle) filteredData = filteredData.filter(item => item.pestle === pestle);
+            if (source) filteredData = filteredData.filter(item => item.source === source);
+            if (country) filteredData = filteredData.filter(item => item.country === country);
+            filteredData = filteredData.filter(item => item.intensity >= intensityMin);
+            filteredData = filteredData.filter(item => item.likelihood === null || item.likelihood >= likelihoodMin);
+
+            // Destroy existing charts if they exist
+            Object.values(charts).forEach(chart => chart.destroy());
+
+            // Create new charts with filtered data
+            charts.intensityByRegion = createChart('intensityByRegionChart', 'bar', 'Intensity by Region', filteredData, 'region', 'intensity');
+            charts.likelihoodByTopic = createChart('likelihoodByTopicChart', 'bar', 'Likelihood by Topic', filteredData, 'topic', 'likelihood');
+            charts.intensityBySector = createChart('intensityBySectorChart', 'bar', 'Intensity by Sector', filteredData, 'sector', 'intensity');
+            charts.likelihoodByPestle = createChart('likelihoodByPestleChart', 'bar', 'Likelihood by PESTLE', filteredData, 'pestle', 'likelihood');
+            charts.intensityByCountry = createChart('intensityByCountryChart', 'bar', 'Intensity by Country', filteredData, 'country', 'intensity');
+        }
+
+        function createChart(id, type, label, data, xKey, yKey) {
+            const ctx = document.getElementById(id).getContext('2d');
+
+            // Get unique labels from all data (to ensure consistent x-axis)
+            const allLabels = [...new Set(allData.map(item => item[xKey]))].filter(label => label !== '' && label !== null);
+
+            // Group filtered data by xKey and calculate average values
+            const groupedData = {};
+            data.forEach(item => {
+                const key = item[xKey];
+                if (key && key !== '') {
+                    if (!groupedData[key]) groupedData[key] = [];
+                    groupedData[key].push(item[yKey]);
+                }
+            });
+
+            // Calculate average values for each label
+            const values = allLabels.map(label => {
+                const nums = (groupedData[label] || [])
+                    .filter(v => v !== null && v !== '' && !isNaN(v))
+                    .map(Number);
+                return nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : 0;
+            });
+
+            // Check if there’s any valid data
+            const hasData = values.some(value => value > 0);
+
+            // Color array for bars
+            const colors = [
+                'rgba(255, 99, 132, 0.6)',  // Red
+                'rgba(54, 162, 235, 0.6)',  // Blue
+                'rgba(255, 206, 86, 0.6)',  // Yellow
+                'rgba(75, 192, 192, 0.6)',  // Teal
+                'rgba(153, 102, 255, 0.6)', // Purple
+                'rgba(255, 159, 64, 0.6)'   // Orange
+            ];
+            const borderColors = colors.map(color => color.replace('0.6', '1'));
+
+            // If no valid data, display a placeholder chart
+            if (!hasData) {
+                return new Chart(ctx, {
+                    type: type,
+                    data: {
+                        labels: ['No Data'],
+                        datasets: [{
+                            label: label,
+                            data: [0],
+                            backgroundColor: 'rgba(200, 200, 200, 0.6)',
+                            borderColor: 'rgba(200, 200, 200, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: { 
+                            y: { 
+                                beginAtZero: true
+                            } 
+                        },
+                        plugins: {
+                            tooltip: {
+                                enabled: false // Disable tooltips for placeholder
+                            }
+                        }
+                    }
+                });
+            }
+
+            return new Chart(ctx, {
+                type: type,
+                data: {
+                    labels: allLabels,
+                    datasets: [{
+                        label: label,
+                        data: values,
+                        backgroundColor: allLabels.map((_, i) => colors[i % colors.length]),
+                        borderColor: allLabels.map((_, i) => borderColors[i % borderColors.length]),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: { 
+                        y: { 
+                            beginAtZero: true
+                        } 
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.raw.toFixed(2)}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

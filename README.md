@@ -13,7 +13,7 @@ cd dashboard_project
 Install the required Python packages:
 pip install -r requirements.txt
 
-### 3. Generate the Database
+### 3. Generate the Database (optional if no new data)
 Create the database from the JSON file:
 python load_data.py
 

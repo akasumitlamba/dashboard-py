@@ -28,5 +28,5 @@ You should see the dashboard with filters and charts.
 
 ## PREVIEW
 
-![image](https://github.com/user-attachments/assets/cea7aa41-5126-4de8-86e4-f6d8c3cee6c5)
+![image](https://github.com/user-attachments/assets/c944a49a-e95b-4922-88e1-1d6e74db60a6)
 

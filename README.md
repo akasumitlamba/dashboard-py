@@ -25,3 +25,8 @@ python app.py
 Open your browser and go to:
 http://127.0.0.1:5000
 You should see the dashboard with filters and charts.
+
+## PREVIEW
+
+![image](https://github.com/user-attachments/assets/cea7aa41-5126-4de8-86e4-f6d8c3cee6c5)
+
